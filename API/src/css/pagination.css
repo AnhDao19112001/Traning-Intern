@@ -1,0 +1,29 @@
+.pagination {
+    margin-top: 40px;
+    display: flex;
+    list-style: none;
+    padding: 0;
+    justify-content: center;
+  }
+  
+  .page-num {
+    margin: 0 5px;
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    /* background-color: #007bff; */
+  }
+  
+  .page-previous,
+  .page-next {
+    margin: 0 15px;
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  .active {
+    /* background-color: #007bff; */
+    color: #fff;
+  }
+  
