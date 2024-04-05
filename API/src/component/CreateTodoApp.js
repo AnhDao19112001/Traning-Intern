@@ -3,17 +3,33 @@ import { NavLink, useNavigate } from "react-router-dom";
 import todoService from "../service/TodoService";
 import * as yup from 'yup';
 import Swal from "sweetalert2";
+import { useEffect, useState } from "react";
+
 function CreateTodoApp() {
+    const [typeStatus, setTypeStatus] = useState([]);
     const navigate = useNavigate();
-    return(
+    const getTypeStatus = async () => {
+        const result = await todoService.typeStatus();
+        setTypeStatus(result);
+    }
+
+    useEffect(() => {
+        getTypeStatus();
+    },[])
+
+    return (
         <Formik 
-        initialValues={{
-            name: "",
-            time: "",
-            day: "",
-            description: "",
-        }} 
-        validationSchema={yup.object({
+            initialValues={{
+                name: "",
+                time: "",
+                day: "",
+                description: "",
+                status_id: "",
+                type_status: {
+                    type: ""
+                }
+            }} 
+            validationSchema={yup.object({
             name: yup.string()
             .matches(/^[\p{L}\p{Mn}\p{Mc}\s]+$/u, "Tên không chứa ký tự đặc biệt!")
             .required("Không được để trống!").max(50,"Tên không được quá 50 ký tự!")
@@ -25,17 +41,19 @@ function CreateTodoApp() {
             .required("Không được phép để trống!").max(50,"Không quá 50 ký tự").min(2,"Phải dài hơn 2 ký tự!")
             .matches(/^[0-9+.]+$/,"Không chứa ký tự đặc biệt!"),
             description: yup.string()
-            .required("Không được để trống phần mô tả!")
-        })}
-        onSubmit={async (values) => {
-            await todoService.createTodo(values);
-            Swal.fire({
-                title: "Add todo success",
-                icon: "success"
-            })
-            navigate(`/`);
-        }}>
-            {({handleSubmit}) => (
+            .required("Không được để trống phần mô tả!"),
+            status_id: yup.string().required("không để trống!")
+            })}
+            onSubmit={async (values) => {
+                await todoService.createTodo(values);
+                Swal.fire({
+                    title: 'Create '+values.name+' success',
+                    icon: 'success'
+                })
+                navigate('/')
+            }}
+        >
+            {({handleSubmit, handleChange, values }) => (
                 <form onSubmit={handleSubmit}>
                     <div className="container mt-5">
                         <div className="row">
@@ -44,9 +62,9 @@ function CreateTodoApp() {
                                     <h3 className="d-flex justify-content-center">Create TodoApp</h3>
                                 </div>
                                 <Form accept="" className="shadow p-4 mb-5">
-                                    <div className="mb-3">
-                                        <label htmlFor="name">Name Todo</label>
-                                        <Field
+                                <div className="mb-3">
+                                         <label htmlFor="name">Name Todo</label>
+                                         <Field
                                             type="text"
                                             className="form-control"
                                             name="name"
@@ -124,9 +142,27 @@ function CreateTodoApp() {
                                                             component="small" />
                                             </div>
                                     </div>
+                                    <div className="mb-3">
+                                        <label htmlFor="status_id">Status</label>
+                                        <Field as="select" className="form-select" value={values.status_id} name="status_id" onChange={handleChange}>
+                                            <option value="" disabled>Select Status</option>
+                                            {typeStatus.map((value) => (
+                                                <option key={value.id} value={value.id}>
+                                                    {value.type}
+                                                </option>
+                                            ))}
+                                        </Field>
+                                    </div>
                                     <div className="mb-5">
                                         <NavLink to={`/`} type="button" className="btn btn-outline-dark float-start">Go Home</NavLink>
-                                        <button type="button" onClick={handleSubmit} className="btn btn-outline-primary col-1 float-end" style={{width: "auto"}}>Save</button>
+                                        <button 
+                                            type="button"
+                                            onClick={handleSubmit}
+                                            className="btn btn-outline-primary col-1 float-end" 
+                                            style={{ width: "auto" }}
+                                        >
+                                            Save
+                                        </button>
                                     </div>
                                 </Form>
                             </div>
@@ -137,6 +173,5 @@ function CreateTodoApp() {
         </Formik>
     )
 }
-
 
 export default CreateTodoApp;

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { Link, NavLink } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import ReactPaginate from "react-paginate";
 import { CiSearch } from "react-icons/ci";
 import todoService from "../service/TodoService";
@@ -12,7 +12,7 @@ function Home() {
     const [currentItems, setCurrentItems] = useState([]);
     const [findByName, setFindByName] = useState("")
     const [sortBy, setSortBy] = useState("name");
-    const [sortOrder, setSortOrder] = useState(1);
+    const [sortOrder, setSortOrder] = useState("asc");
     const [todoList, setTodoList] = useState([]);
     const [pageCount, setPageCount] = useState(0);
     const [itemOffset, setItemOffset] = useState(0);
@@ -87,11 +87,11 @@ const toggleModal = () => setModal(!modal);
                 const todoData = await todoService.search(findByName, sortBy, sortOrder);
                 setTodoList(todoData);
             } catch (error) {
-                console.log(error);
+                console.log(error+'chưa được rồi');
             }
         };
         searchByName();
-    }, [sortBy, sortOrder]);
+    }, [sortBy, sortOrder, findByName]);
 
     const handleSubmit = async (values) => {
       try {
@@ -105,30 +105,30 @@ const toggleModal = () => setModal(!modal);
 
 // --------------- Status Todo App --------------- //
 
-    const handleStatus = async (id) => {
-      try {
-        if (id) {
-          const todo = await todoService.findById(id);
-          if (todo) {
-            const updatedTodo = { ...todo, status: !todo.status };
-            await todoService.updateTodo(id, updatedTodo);
-            const updatedItems = currentItems.map(item => {
-              if (item._id === id) {
-                return { ...item, status: !item.status };
-              }
-              return item;
-            });
-            setCurrentItems(updatedItems);
-          } else {
-            throw new Error('Không tìm thấy công việc');
-          }
-        } else {
-          throw new Error('id không tồn tại');
-        }
-      } catch (error) {
-        console.error(error);
-      }
-    };
+    // const handleStatus = async (id) => {
+    //   try {
+    //     if (id) {
+    //       const todo = await todoService.findById(id);
+    //       if (todo) {
+    //         const updatedTodo = { ...todo, status: !todo.status };
+    //         await todoService.updateTodo(id, updatedTodo);
+    //         const updatedItems = currentItems.map(item => {
+    //           if (item.id === id) {
+    //             return { ...item, status: !item.status };
+    //           }
+    //           return item;
+    //         });
+    //         setCurrentItems(updatedItems);
+    //       } else {
+    //         throw new Error('Không tìm thấy công việc');
+    //       }
+    //     } else {
+    //       throw new Error('id không tồn tại');
+    //     }
+    //   } catch (error) {
+    //     console.error(error);
+    //   }
+    // };
 
     return(
         <>
@@ -159,8 +159,8 @@ const toggleModal = () => setModal(!modal);
               </div>
               <div className="col-auto me-2">
                   <select className="form-select" onChange={(event) => setSortOrder(event.target.value)}>
-                    <option value="1">Giảm gần</option>
-                    <option value="-1">Tăng dần</option>
+                    <option value="asc">Giảm gần</option>
+                    <option value="desc">Tăng dần</option>
                   </select>
               </div>
           <NavLink to={`/createTodo`} className={"btn btn-outline-primary float-end"} style={{marginRight:"85px"}}>Add Todo</NavLink>
@@ -172,25 +172,18 @@ const toggleModal = () => setModal(!modal);
                 <th scope="col">NO</th>
                 <th scope="col">Todo</th>
                 <th scope="col">Description</th>
-                <th scope="col">Status</th>
                 <th scope="col">Function</th>
               </tr>
             </thead>
             <tbody className="text-center">
               {
                 currentItems.map((value, key) => (
-                  <tr key={key+1} scope="row">
+                  <tr key={key.id} scope="row">
                     <th scope="row">{++stt}</th>
-                    <td><Link to={`/getByID/${value._id}`}>{value.name}</Link></td>
+                    <td><NavLink to={`/getByID/${value.id}`}>{value.name}</NavLink></td>
                     <td>{value.description}</td>
                     <td>
-                    <input
-                      type="checkbox"
-                      checked={value.status}
-                      onChange={() => handleStatus(value._id)}/>
-                    </td>
-                    <td>
-                      <NavLink to={`/update/${value._id}`} className={"btn btn-outline-warning mx-2"}>Update</NavLink>
+                      <NavLink to={`/update/${value.id}`} className={"btn btn-outline-warning mx-2"}>Update</NavLink>
                       <Button outline color="danger" className="btn btn-outline-modal" onClick={() => deleteTodoApp(value)}>Delete</Button>
                     </td>
                   </tr>
@@ -222,7 +215,7 @@ const toggleModal = () => setModal(!modal);
                 </ModalBody>
                 <ModalFooter>
                     <Button color="secondary" onClick={toggleModal}>Close</Button>
-                    <Button color="danger" onClick={() => handleDelete(todoObject._id)}>Delete</Button>
+                    <Button color="danger" onClick={() => handleDelete(todoObject.id)}>Delete</Button>
                 </ModalFooter>
             </Modal>
         </div>

@@ -7,9 +7,16 @@ import * as yup from 'yup';
 import Swal from "sweetalert2";
 function UpdateTodoApp() {
     const [todoApp, setTodoApp] = useState();
+    const [typeStatus, setTypeStatus] = useState([]);
     const navigate = useNavigate();
     const param = useParams();
-
+    const getStatus = async () => {
+        const result = await todoService.typeStatus();
+        setTypeStatus(result);
+    }
+    useEffect(() => {
+        getStatus();
+    },[])
     const getByID = async () => {
         const result = await todoService.findById(param.id);
         setTodoApp(result);
@@ -31,6 +38,11 @@ function UpdateTodoApp() {
             time: todoApp?.time,
             day: todoApp?.day,
             description: todoApp?.description, 
+            status_id: todoApp?.status_id,
+            type_status: {
+                id:todoApp?.type_status?.id,
+                type: todoApp?.type_status?.type
+            }
         }}
         validationSchema={yup.object({
             name: yup.string()
@@ -53,7 +65,7 @@ function UpdateTodoApp() {
             navigate(`/`)
         }}
         >
-            {({handleSubmit}) => (
+            {({handleSubmit, handleChange, values}) => (
                 <form onSubmit={handleSubmit}>
                     <div className="container mt-5">
                         <div className="row">
@@ -141,6 +153,15 @@ function UpdateTodoApp() {
                                                         <ErrorMessage className="text-danger" name="description"
                                                             component="small" />
                                             </div>
+                                    </div>
+                                    <div className="mb-3">
+                                        <label htmlFor="status_id">Status</label>
+                                        <Field as="select" name="status_id" className="form-select" value={values.status_id} onChange={handleChange}>
+                                            <option value="" disabled>Select status</option>
+                                            {typeStatus.map((status) => (
+                                                <option key={status.id} value={status.id}>{status.type}</option>
+                                            ))}
+                                        </Field>
                                     </div>
                                     <div className="mb-5">
                                         <NavLink to={`/`} type="button" className="btn btn-outline-dark float-start">Go Home</NavLink>

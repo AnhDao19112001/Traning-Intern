@@ -4,7 +4,18 @@ import { useParams } from "react-router-dom";
 import { NavLink } from "react-router-dom";
 function DetailTodoApp() {
     const [todo, setTodo] = useState({});
+    const [typeStatus, setTypeStatus] = useState([])
     const param = useParams();
+
+    const getListStatus = async () => {
+        const result = await todoService.typeStatus();
+        setTypeStatus(result)
+    }
+
+    useEffect(() => {
+        getListStatus();
+    },[])
+
     const getDetail = async () => {
         const result = await todoService.findById(param.id);
         console.log(result);
@@ -12,7 +23,7 @@ function DetailTodoApp() {
     } 
     useEffect(() => {
         getDetail();
-    },[])
+    },[param.id])
     return(
         <form>
             <div className="container mt-5">
@@ -49,6 +60,14 @@ function DetailTodoApp() {
                                     name="description"
                                     id="description">{todo.description}</p>
                         </div>
+                        <div className="mb-3">
+                        <label htmlFor="description">Trạng thái công việc</label>
+                        <p type=""
+                                    className="form-control"
+                                    name="type"
+                                    id="type">{todo.type_status?.type}</p>
+                    </div>
+
                         <div className="mb-5">
                             <NavLink to={`/`} type="button" className="btn btn-outline-dark float-start">Go Home</NavLink>
                         </div>
